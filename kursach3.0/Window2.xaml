@@ -1,0 +1,47 @@
+﻿<Window x:Class="kursach3._0.Window2"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:kursach3._0" 
+        mc:Ignorable="d"
+        Title="Window1" Height="593" Width="960"
+        Background="#161616"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MouseLeftButtonUp="Window_MouseLeftButtonUp"
+        MouseMove="Window_MouseMove">
+
+
+
+    <Window.Resources>
+
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="#00ff00"/>
+            <Setter Property="Background" Value="#1F1F1F"/>
+        </Style>
+
+        <!-- Define the Storyboard -->
+        <Storyboard x:Key="TextColorAnimation" RepeatBehavior="Forever" AutoReverse="True">
+            <!-- Animation to change text color from green to black -->
+            <ColorAnimation Storyboard.TargetName="textBlock" 
+                            Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)"
+                            From="Lime" To="Black" Duration="0:0:2"/>
+        </Storyboard>
+    </Window.Resources>
+    <Grid>
+        <Border BorderBrush="#FF31FF00" BorderThickness="2,2,2,2">
+            <TextBlock HorizontalAlignment="Left" Height="415" Margin="32,90,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="866" Foreground="Lime"/>
+        </Border>
+        <Button Content="CLOSE" Click="Close_Click" Margin="860,547,22,24" Foreground="Lime"/>
+        <Border BorderBrush="Lime" BorderThickness="2,2,2,2" HorizontalAlignment="Left" Height="62" VerticalAlignment="Top" Width="246" Margin="355,-2,0,0"/>
+        <TextBlock x:Name="textBlock" Text="NeoSort" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-3,0,0" Foreground="Lime"/>
+    </Grid>
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Window.Loaded">
+            <BeginStoryboard Storyboard="{StaticResource TextColorAnimation}"/>
+        </EventTrigger>
+    </Window.Triggers>
+</Window>
