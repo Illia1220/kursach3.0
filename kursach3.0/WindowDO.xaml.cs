@@ -11,6 +11,7 @@ using SciChart.Charting.Model.DataSeries;
 using SciChart.Charting.Visuals.RenderableSeries;
 using System.Windows.Media.Animation;
 using System.IO;
+using kursach3._0.Service;
 using Microsoft.Win32;
 
 
@@ -111,73 +112,56 @@ namespace kursach3._0
             }
 
 
-            int[] array = GenerateArrayGenerateArray(size, minValue, maxValue, arrayType);
+            int[] array = GenerateService.GenerateArray(size, minValue, maxValue, arrayType);
             if (array == null)
                 return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            ShellSortClassik(array);
+            sortedArray = SortService.ShellSortClassik(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
             DisplaySortedArray();
         }
 
-        private int[] GenerateArray(int size, int minValue, int maxValue, string arrayType)
-        {
-            int[] array = new int[size];
+        //private int[] GenerateArray(int size, int minValue, int maxValue, string arrayType)
+        //{
+        //    int[] array = new int[size];
 
-            switch (arrayType)
-            {
-                case "Ordered":
-                    for (int i = 0; i < size; i++)
-                    {
-                        array[i] = minValue + i * (maxValue - minValue) / size;
-                    }
-                    break;
+        //    switch (arrayType)
+        //    {
+        //        case "Ordered":
+        //            for (int i = 0; i < size; i++)
+        //            {
+        //                array[i] = minValue + i * (maxValue - minValue) / size;
+        //            }
+        //            break;
 
-                case "Reversed":
-                    for (int i = 0; i < size; i++)
-                    {
-                        array[i] = maxValue - i * (maxValue - minValue) / size;
-                    }
-                    break;
+        //        case "Reversed":
+        //            for (int i = 0; i < size; i++)
+        //            {
+        //                array[i] = maxValue - i * (maxValue - minValue) / size;
+        //            }
+        //            break;
 
-                case "Random":
-                default:
-                    Random random = new Random();
-                    for (int i = 0; i < size; i++)
-                    {
-                        array[i] = random.Next(minValue, maxValue + 1);
-                    }
-                    break;
-            }
+        //        case "Random":
+        //        default:
+        //            Random random = new Random();
+        //            for (int i = 0; i < size; i++)
+        //            {
+        //                array[i] = random.Next(minValue, maxValue + 1);
+        //            }
+        //            break;
+        //    }
 
-            return array;
-        }
-
-
+        //    return array;
+        //}
 
 
 
-        private void ShellSortClassik(int[] array)
-        {
-            int n = array.Length;
-            for (int gap = n / 2; gap > 0; gap /= 2)
-            {
-                for (int i = gap; i < n; i += 1)
-                {
-                    int temp = array[i];
-                    int j;
-                    for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
-                    {
-                        array[j] = array[j - gap];
-                    }
-                    array[j] = temp;
-                }
-            }
-            sortedArray = array;
-        }
+
+
+    
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,12 +216,12 @@ namespace kursach3._0
             }
 
 
-            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            int[] array = GenerateService.GenerateArray(size, minValue, maxValue, arrayType);
             if (array == null)
                 return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            ShellSortSedgewick(array);
+            sortedArray = SortService.ShellSortSedgewick(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
@@ -246,30 +230,7 @@ namespace kursach3._0
 
        
 
-        private void ShellSortSedgewick(int[] array)
-        {
-            int n = array.Length;
-            int gap = 1;
-            while (gap < n / 3)
-            {
-                gap = 3 * gap + 1;
-            }
-            while (gap >= 1)
-            {
-                for (int i = gap; i < n; i++)
-                {
-                    int temp = array[i];
-                    int j;
-                    for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
-                    {
-                        array[j] = array[j - gap];
-                    }
-                    array[j] = temp; // Правильне розміщення цього рядка коду
-                }
-                gap /= 3;
-            }
-            sortedArray = array;
-        }
+       
 
 
 
@@ -340,12 +301,12 @@ namespace kursach3._0
 
 
 
-            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            int[] array = GenerateService.GenerateArray(size, minValue, maxValue, arrayType);
             if (array == null)
                 return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            ShellSortFibonacci(array);
+            sortedArray = SortService.ShellSortFibonacci(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
@@ -355,44 +316,7 @@ namespace kursach3._0
 
         
 
-        private void ShellSortFibonacci(int[] array)
-        {
-            int nq = array.Length;
-            int fib1 = 1;
-            int fib2 = 0;
-            int fib3 = 0;
-            int i;
-            while (fib3 < nq)
-            {
-                fib3 = fib1 + fib2;
-                fib1 = fib2;
-                fib2 = fib3;
-            }
-            fib1 = fib2 - fib1;
-            fib2 -= fib1;
-            while (fib2 > 0)
-            {
-                i = fib2;
-                while (i < nq)
-                {
-                    int temp = array[i];
-                    int j = i - fib2;
-                    while (j >= 0 && array[j] > temp)
-                    {
-                        array[j + fib2] = array[j];
-                        j -= fib2;
-                    }
-                    array[j + fib2] = temp;
-                    i++;
-                }
-                int tempFib = fib2;
-                fib2 = fib1;
-                fib1 = tempFib - fib1;
-            }
-
-            sortedArray = array;
-
-        }
+        
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -458,57 +382,21 @@ namespace kursach3._0
             }
 
 
-            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            int[] array = GenerateService.GenerateArray(size, minValue, maxValue, arrayType);
             if (array == null)
                 return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            ShellSortTokuda(array);
+            sortedArray = SortService.ShellSortTokuda(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
             DisplaySortedArray();
         }
 
-        private void ShellSortTokuda(int[] array)
-        {
-            int n = array.Length;
-            int[] tokudaSequence = GenerateTokudaSequence(n);
-            for (int k = tokudaSequence.Length - 1; k >= 0; k--)
-            {
-                int gap = tokudaSequence[k];
-                for (int i1 = gap; i1 < n; i1++)
-                {
-                    int temp = array[i1];
-                    int j;
-                    for (j = i1; j >= gap && array[j - gap] > temp; j -= gap)
-                    {
-                        array[j] = array[j - gap];
-                    }
-                    array[j] = temp;
-                }
-                sortedArray = array;
-            }
-            // Обновление GUI (вынесено за внутренний цикл)
+  
 
-
-        }
-
-        private  int[] GenerateTokudaSequence(int n)
-        {
-            Random rand = new Random();
-            int count = rand.Next(1, n);
-            int[] sequence = new int[count];
-            for (int i = 0; i < count; i++)
-            {
-                sequence[i] = rand.Next(1, n / 2);
-                sortedArray = sequence;
-            }
-            Array.Reverse(sequence);
-
-         
-            return sequence;
-        }
+      
 
       
 
@@ -594,7 +482,7 @@ namespace kursach3._0
         private async Task TokudaSort(int[] array, XyDataSeries<int, int> dataSeries)
         {
             int n = array.Length;
-            int[] tokudaSequence = GenerateTokudaSequence(n);
+            int[] tokudaSequence = GenerateService.GenerateTokudaSequence(n);
             for (int k = tokudaSequence.Length - 1; k >= 0; k--)
             {
                 int gap = tokudaSequence[k];
@@ -755,7 +643,7 @@ namespace kursach3._0
 
             string arrayType = (ArrayTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
 
-            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            int[] array = GenerateService.GenerateArray(size, minValue, maxValue, arrayType);
             if (array == null)
                 return;
             //Array.Sort(array);

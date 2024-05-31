@@ -68,8 +68,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Abt\Controls.cs" />
-    <Compile Include="Service\GenerateArray.cs" />
-    <Compile Include="Service\SortedService.cs" />
+    <Compile Include="Service\GenerateService.cs" />
+    <Compile Include="Service\SortService.cs" />
     <Compile Include="Window2.xaml.cs">
       <DependentUpon>Window2.xaml</DependentUpon>
     </Compile>
@@ -120,5 +120,6 @@
   <ItemGroup>
     <Resource Include="CSE3.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
