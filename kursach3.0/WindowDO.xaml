@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:kursach3._0" xmlns:sci="http://schemas.abtsoftware.co.uk/scichart"
         mc:Ignorable="d"
-        Title="Window1" Height="593" Width="960"
+        Title="Window1" Height="668" Width="960"
         Background="#161616"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -13,13 +13,8 @@
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
         MouseLeftButtonUp="Window_MouseLeftButtonUp"
         MouseMove="Window_MouseMove">
-    
-        
-    
+
     <Window.Resources>
-
-        
-
         <Style TargetType="Button">
             <Setter Property="Foreground" Value="#00ff00"/>
             <Setter Property="Background" Value="#1F1F1F"/>
@@ -31,35 +26,23 @@
             <Setter Property="Foreground" Value="#00ff00"/>
             <Setter Property="Background" Value="#1F1F1F"/>
         </Style>
-
         <Style TargetType="sci:FastColumnRenderableSeries">
             <Setter Property="Stroke" Value="#00ff00"/>
             <Setter Property="Fill" Value="#00ff00"/>
         </Style>
-
-
     </Window.Resources>
 
-
-
-
-
-
     <Grid>
-
         <Border BorderBrush="#FF31FF00" BorderThickness="2,2,2,2"/>
         <TextBlock x:Name="textBlock" Text="Neo.Sort" FontSize="60" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="384,129,0,0">
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
                     <Setter Property="Foreground" Value="Black"/>
-                    
                 </Style>
             </TextBlock.Style>
         </TextBlock>
 
-
-
-        <sci:SciChartSurface x:Name="sortingChart" HorizontalAlignment="Center" Height="288" Margin="0,289,0,0" VerticalAlignment="Top" Width="845" Foreground="Lime" BorderBrush="Lime" Background="#FF161616">
+        <sci:SciChartSurface x:Name="sortingChart" HorizontalAlignment="Center" Height="213" Margin="0,289,0,0" VerticalAlignment="Top" Width="844" Foreground="Lime" BorderBrush="Lime" Background="#FF161616">
             <sci:SciChartSurface.XAxis>
                 <sci:NumericAxis />
             </sci:SciChartSurface.XAxis>
@@ -69,23 +52,39 @@
         </sci:SciChartSurface>
         <Button x:Name="Fibonachi" Content="FIBONACHI" HorizontalAlignment="Left" Margin="518,27,0,0" VerticalAlignment="Top" Height="28" Width="122" Click="Fibonachi_Click"/>
         <Button x:Name="Sedjvik" Content="SEDJVIK" HorizontalAlignment="Left" Margin="310,27,0,0" VerticalAlignment="Top" Height="28" Width="122" Click="Sedjvik_Click"/>
-
-        <Button x:Name="ResetButton" Content="Начать заново" HorizontalAlignment="Left" Height="24" Margin="743,239,0,0" VerticalAlignment="Top" Width="112" Click="Reset_Click"/>
-
-
-        <TextBlock HorizontalAlignment="Left" Margin="15,121,0,0" TextWrapping="Wrap" Text="SIZE OF ARRAY" VerticalAlignment="Top"/>
-        <TextBox x:Name="Size_array" HorizontalAlignment="Left" Margin="165,119,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="Size_array_TextChanged" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
-        <TextBlock HorizontalAlignment="Left" Margin="15,160,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="168" Text="MIN VALUE OF ELEMENTS"/>
-        <TextBox x:Name="Min_value" HorizontalAlignment="Left" Margin="165,158,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="Min_value_TextChanged" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
-        <TextBlock HorizontalAlignment="Left" Margin="15,202,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="MAX VALUE OF ELEMENTS"/>
-        <TextBox x:Name="Max_value" HorizontalAlignment="Left" Margin="165,202,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="Max_value_TextChanged" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+        <Button x:Name="ResetButton" Content="Начать заново" HorizontalAlignment="Left" Height="24" Margin="743,188,0,0" VerticalAlignment="Top" Width="112" Click="Reset_Click"/>
+        <TextBlock HorizontalAlignment="Left" Margin="15,108,0,0" TextWrapping="Wrap" Text="SIZE OF ARRAY" VerticalAlignment="Top"/>
+        <TextBox x:Name="Size_array" HorizontalAlignment="Left" Margin="165,106,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="Size_array_TextChanged" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+        <TextBlock HorizontalAlignment="Left" Margin="15,149,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="168" Text="MIN VALUE OF ELEMENTS"/>
+        <TextBox x:Name="Min_value" HorizontalAlignment="Left" Margin="165,147,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="Min_value_TextChanged" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
+        <TextBlock HorizontalAlignment="Left" Margin="15,189,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="MAX VALUE OF ELEMENTS"/>
+        <TextBox x:Name="Max_value" HorizontalAlignment="Left" Margin="165,189,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="Max_value_TextChanged" PreviewTextInput="NumericTextBox_PreviewTextInput"/>
         <Button x:Name="Tokuda" Content="TOKUDA" HorizontalAlignment="Left" Height="28" Margin="725,27,0,0" VerticalAlignment="Top" Width="122" Click="Tokuda_Click"/>
         <Button x:Name="Classik" Content="CLASSIK" HorizontalAlignment="Left" Height="28" Margin="76,27,0,0" VerticalAlignment="Top" Width="122" Click="Classik_Click"/>
-        <Button x:Name="Sberegty" Content="Зберегти" HorizontalAlignment="Left" Height="25" Margin="743,113,0,0" VerticalAlignment="Top" Width="112" Click="Sberegty_Click"/>
-        <Button x:Name="Visual" Content="Візуалізувати" HorizontalAlignment="Left" Height="24" Margin="743,155,0,0" VerticalAlignment="Top" Width="112" Click="Visual_Click"/>
-        <Button x:Name="Stop" Content="Завершити" HorizontalAlignment="Left" Height="24" Margin="743,197,0,0" VerticalAlignment="Top" Width="112" Click="Stop_Click"/>
-        <TextBox x:Name="Time_taken" HorizontalAlignment="Left" Margin="466,252,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" TextChanged="Time_taken_TextChanged" Height="22"/>
-        <TextBlock HorizontalAlignment="Left" Margin="361,254,0,0" TextWrapping="Wrap" Text="TIME OF SORTING:" VerticalAlignment="Top"/>
-        <Button Content="користування" HorizontalAlignment="Left" Margin="873,10,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button x:Name="Sberegty" Content="Зберегти" HorizontalAlignment="Left" Height="25" Margin="743,105,0,0" VerticalAlignment="Top" Width="112" Click="Sberegty_Click"/>
+        <Button x:Name="Visual" Content="Візуалізувати" HorizontalAlignment="Left" Height="24" Margin="743,147,0,0" VerticalAlignment="Top" Width="112" Click="Visual_Click"/>
+        <Button x:Name="Stop" Content="X" HorizontalAlignment="Left" Height="24" Margin="930,2,0,0" VerticalAlignment="Top" Width="28" Click="Stop_Click" RenderTransformOrigin="1.086,-0.029"/>
+        <TextBox x:Name="Time_taken" HorizontalAlignment="Left" Margin="524,252,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="175" TextChanged="Time_taken_TextChanged" Height="22" Background="#FF161616" BorderBrush="#FF161616"/>
+        <TextBlock HorizontalAlignment="Left" Margin="418,254,0,0" TextWrapping="Wrap" Text="TIME OF SORTING:" VerticalAlignment="Top"/>
+        <Button Content="користування" HorizontalAlignment="Left" Margin="743,227,0,0" VerticalAlignment="Top" Click="Button_Click" Height="24" Width="112"/>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="15,545,16,10">
+            <TextBlock x:Name="SortedArrayDisplay" TextWrapping="Wrap" />
+        </ScrollViewer>
+        <TextBlock HorizontalAlignment="Left" Margin="19,524,0,0" TextWrapping="Wrap" Text="Sorted Array:" VerticalAlignment="Top"/>
+
+        <!-- Новые элементы управления для выбора метода генерации массива -->
+        <ComboBox x:Name="ArrayTypeComboBox" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,262,0,0" Width="120" BorderBrush="Black" Height="20" SelectionChanged="ArrayTypeComboBox_SelectionChanged">
+            <ComboBox.Background>
+                <LinearGradientBrush EndPoint="0,1">
+                    <GradientStop Color="Black"/>
+                    <GradientStop Color="Black" Offset="1"/>
+                </LinearGradientBrush>
+            </ComboBox.Background>
+            <ComboBoxItem Content="Random"/>
+            <ComboBoxItem Content="Ordered"/>
+            <ComboBoxItem Content="Reversed"/>
+        </ComboBox>
+        <TextBlock HorizontalAlignment="Left" Margin="15,241,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Text="CHOOSE METHOD OF GANERATING:"/>
+
     </Grid>
 </Window>

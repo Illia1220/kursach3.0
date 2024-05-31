@@ -2,23 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using SciChart.Charting.Model.DataSeries;
 using SciChart.Charting.Visuals.RenderableSeries;
-using SciChart.Charting.Visuals;
-using System.Threading;
-using SciChart.Data.Model;
-using SciChart.Charting.Visuals.Axes;
 using System.Windows.Media.Animation;
+using System.IO;
+using Microsoft.Win32;
 
 
 namespace kursach3._0
@@ -28,8 +21,16 @@ namespace kursach3._0
     /// </summary>
     public partial class Window1 : Window
     {
+
+
+
+        private int[] _array;
+        private string _mode;
         private int[] sortedArray;
         private bool isAnimating;
+
+        private XyDataSeries<int, int> dataSeries = new XyDataSeries<int, int>();
+        private Random random = new Random();
 
         public Window1()
         {
@@ -38,35 +39,41 @@ namespace kursach3._0
         }
 
 
-
-
-
-
-
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        private void DisplaySortedArray()
+        {
+            if (sortedArray != null)
+            {
+                SortedArrayDisplay.Text = string.Join(", ", sortedArray);
+            }
+        }
+
+
 
 
 
         private void Classik_Click(object sender, RoutedEventArgs e)
         {
-
-            if (!IsValidInput())
-            {
-                MessageBox.Show("Введенные данные должны содержать только цифры и не должны быть пустыми.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
+            _mode = "classik";
 
             if (string.IsNullOrWhiteSpace(Size_array.Text) || string.IsNullOrWhiteSpace(Min_value.Text) || string.IsNullOrWhiteSpace(Max_value.Text))
             {
-                MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Будь ласка, заповніть усі поля.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!IsValidInput())
+            {
+                MessageBox.Show("Введені дані повинні містити лише цифри та не можуть бути порожніми.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (ContainsWhitespace(Size_array.Text) || ContainsWhitespace(Min_value.Text) || ContainsWhitespace(Max_value.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -75,7 +82,7 @@ namespace kursach3._0
                 size = int.Parse(Size_array.Text);
             if (size < 100)
             {
-                MessageBox.Show("Минимальный размер массива должен быть не менее 100 элементов.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Мінімальний розмір масиву має бути не менше 100 елементів.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -89,11 +96,22 @@ namespace kursach3._0
 
             if (maxValue > 50000)
             {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Максимальне значення елемента не повинно перевищувати 50000.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            int[] array = GenerateRandomArray2(size, minValue, maxValue);
+            // Get the selected array type
+            string arrayType = (ArrayTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+
+            if (arrayType == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите метод генерации массива в ComboBox.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+
+            int[] array = GenerateArrayGenerateArray(size, minValue, maxValue, arrayType);
             if (array == null)
                 return;
 
@@ -102,34 +120,44 @@ namespace kursach3._0
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
-
-
-            //var totalMs = TimeSpan.FromTicks(stopwatch.ElapsedTicks).TotalMilliseconds;
-
+            DisplaySortedArray();
         }
 
-        private int[] GenerateRandomArray(int size, int minValue, int maxValue)
+        private int[] GenerateArray(int size, int minValue, int maxValue, string arrayType)
         {
-            if (size < 100)
-            {
-                MessageBox.Show("Минимальный размер массива должен быть не менее 100 элементов.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-
-            if (maxValue > 50000)
-            {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-
-            Random random = new Random();
             int[] array = new int[size];
-            for (int i = 0; i < size; i++)
+
+            switch (arrayType)
             {
-                array[i] = random.Next(minValue, maxValue + 1);
+                case "Ordered":
+                    for (int i = 0; i < size; i++)
+                    {
+                        array[i] = minValue + i * (maxValue - minValue) / size;
+                    }
+                    break;
+
+                case "Reversed":
+                    for (int i = 0; i < size; i++)
+                    {
+                        array[i] = maxValue - i * (maxValue - minValue) / size;
+                    }
+                    break;
+
+                case "Random":
+                default:
+                    Random random = new Random();
+                    for (int i = 0; i < size; i++)
+                    {
+                        array[i] = random.Next(minValue, maxValue + 1);
+                    }
+                    break;
             }
+
             return array;
         }
+
+
+
 
 
         private void ShellSortClassik(int[] array)
@@ -151,90 +179,72 @@ namespace kursach3._0
             sortedArray = array;
         }
 
-
-
-
-
-
-
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 
         private void Sedjvik_Click(object sender, RoutedEventArgs e)
         {
-
-
-            if (!IsValidInput())
-            {
-                MessageBox.Show("Введенные данные должны содержать только цифры и не должны быть пустыми.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
+            _mode = "Sedjvik";
 
             if (string.IsNullOrWhiteSpace(Size_array.Text) || string.IsNullOrWhiteSpace(Min_value.Text) || string.IsNullOrWhiteSpace(Max_value.Text))
             {
-                MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Будь ласка, заповніть усі поля.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-
-
-            if (ContainsWhitespace(Size_array.Text) || ContainsWhitespace(Min_value.Text) || ContainsWhitespace(Max_value.Text))
+            // Перевірка на коректність введення (лише цифри)
+            if (!Size_array.Text.All(char.IsDigit) || !Min_value.Text.All(char.IsDigit) || !Max_value.Text.All(char.IsDigit))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані повинні містити лише цифри.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            int size = 0;
-            if (!string.IsNullOrEmpty(Size_array.Text))
-                size = int.Parse(Size_array.Text);
-            if (size == 0)
+            // Перевірка на пробіли
+            if (Size_array.Text.Contains(" ") || Min_value.Text.Contains(" ") || Max_value.Text.Contains(" "))
+            {
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
+            }
 
-            int minValue = 0;
-            if (!string.IsNullOrEmpty(Min_value.Text))
-                minValue = int.Parse(Min_value.Text);
-
-            int maxValue = 0;
-            if (!string.IsNullOrEmpty(Max_value.Text))
-                maxValue = int.Parse(Max_value.Text);
+            int size = int.Parse(Size_array.Text);
+            int minValue = int.Parse(Min_value.Text);
+            int maxValue = int.Parse(Max_value.Text);
 
             if (maxValue > 50000)
             {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Максимальне значення елемента не повинно перевищувати 50000.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            int[] array = GenerateRandomArray2(size, minValue, maxValue);
+            if (size < 100)
+            {
+                MessageBox.Show("Мінімальний розмір масиву має бути не менше 100 елементів.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string arrayType = (ArrayTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+
+            if (arrayType == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите метод генерации массива в ComboBox.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+
+            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            if (array == null)
+                return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             ShellSortSedgewick(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
+            DisplaySortedArray();
         }
 
-        private int[] GenerateRandomArray2(int size, int minValue, int maxValue)
-        {
-            if (maxValue > 50000)
-            {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-
-            Random random = new Random();
-            int[] array = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                array[i] = random.Next(minValue, maxValue + 1);
-            }
-            return array;
-        }
+       
 
         private void ShellSortSedgewick(int[] array)
         {
@@ -254,15 +264,11 @@ namespace kursach3._0
                     {
                         array[j] = array[j - gap];
                     }
-                    array[j] = temp;
-
-                    sortedArray = array;
+                    array[j] = temp; // Правильне розміщення цього рядка коду
                 }
                 gap /= 3;
             }
-
-
-
+            sortedArray = array;
         }
 
 
@@ -272,26 +278,27 @@ namespace kursach3._0
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
         private void Fibonachi_Click(object sender, RoutedEventArgs e)
         {
-            if (!IsValidInput())
-            {
-                MessageBox.Show("Введенные данные должны содержать только цифры и не должны быть пустыми.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+
+            _mode = "Fibonachi";
 
             if (string.IsNullOrWhiteSpace(Size_array.Text) || string.IsNullOrWhiteSpace(Min_value.Text) || string.IsNullOrWhiteSpace(Max_value.Text))
             {
-                MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Будь ласка, заповніть усі поля.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
+            if (!IsValidInput())
+            {
+                MessageBox.Show("Введені дані повинні містити лише цифри та не можуть бути порожніми.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
 
             if (ContainsWhitespace(Size_array.Text) || ContainsWhitespace(Min_value.Text) || ContainsWhitespace(Max_value.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -311,46 +318,62 @@ namespace kursach3._0
 
             if (maxValue > 50000)
             {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Максимальне значення елемента не повинно перевищувати 50000.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            int[] array = GenerateRandomArray(size, minValue, maxValue);
+            if (size < 100)
+            {
+                MessageBox.Show("Мінімальний розмір масиву має бути не менше 100 елементів.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+
+            string arrayType = (ArrayTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+
+            if (arrayType == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите метод генерации массива в ComboBox.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+
+
+            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            if (array == null)
+                return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            ShellSortSedgewick(array);
+            ShellSortFibonacci(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
+            DisplaySortedArray();
+
         }
 
-        private int[] GenerateRandomArray1(int size, int minValue, int maxValue)
-        {
-            Random random = new Random();
-            int[] array = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                array[i] = random.Next(minValue, maxValue + 1);
-            }
-            return array;
-        }
+        
 
         private void ShellSortFibonacci(int[] array)
         {
-            int n = array.Length;
+            int nq = array.Length;
             int fib1 = 1;
             int fib2 = 0;
             int fib3 = 0;
-            while (fib3 < n)
+            int i;
+            while (fib3 < nq)
             {
                 fib3 = fib1 + fib2;
                 fib1 = fib2;
                 fib2 = fib3;
             }
+            fib1 = fib2 - fib1;
+            fib2 -= fib1;
             while (fib2 > 0)
             {
-                int i = fib2;
-                while (i < n)
+                i = fib2;
+                while (i < nq)
                 {
                     int temp = array[i];
                     int j = i - fib2;
@@ -360,46 +383,42 @@ namespace kursach3._0
                         j -= fib2;
                     }
                     array[j + fib2] = temp;
-
-                    sortedArray = array;
                     i++;
                 }
-                fib3 = fib1;
+                int tempFib = fib2;
                 fib2 = fib1;
-                fib1 = fib3 - fib2;
+                fib1 = tempFib - fib1;
             }
+
+            sortedArray = array;
+
         }
 
 
-
-
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 
         private void Tokuda_Click(object sender, RoutedEventArgs e)
         {
-
-
-            if (!IsValidInput())
-            {
-                MessageBox.Show("Введенные данные должны содержать только цифры и не должны быть пустыми.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
+            _mode = "Tokuda";
 
             if (string.IsNullOrWhiteSpace(Size_array.Text) || string.IsNullOrWhiteSpace(Min_value.Text) || string.IsNullOrWhiteSpace(Max_value.Text))
             {
-                MessageBox.Show("Пожалуйста, заполните все поля.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Будь ласка, заповніть усі поля.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!IsValidInput())
+            {
+                MessageBox.Show("Введені дані повинні містити лише цифри та не можуть бути порожніми.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
 
             if (ContainsWhitespace(Size_array.Text) || ContainsWhitespace(Min_value.Text) || ContainsWhitespace(Max_value.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -419,20 +438,160 @@ namespace kursach3._0
 
             if (maxValue > 50000)
             {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Максимальне значення елемента не повинно перевищувати 50000.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (size < 100)
+            {
+                MessageBox.Show("Мінімальний розмір масиву має бути не менше 100 елементів.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            int[] array = GenerateRandomArray(size, minValue, maxValue);
+
+            string arrayType = (ArrayTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+
+            if (arrayType == null)
+            {
+                MessageBox.Show("Пожалуйста, выберите метод генерации массива в ComboBox.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+
+            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            if (array == null)
+                return;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            ShellSortSedgewick(array);
+            ShellSortTokuda(array);
             stopwatch.Stop();
 
             Time_taken.Text = $"{stopwatch.ElapsedTicks} ticks";
+            DisplaySortedArray();
         }
 
         private void ShellSortTokuda(int[] array)
+        {
+            int n = array.Length;
+            int[] tokudaSequence = GenerateTokudaSequence(n);
+            for (int k = tokudaSequence.Length - 1; k >= 0; k--)
+            {
+                int gap = tokudaSequence[k];
+                for (int i1 = gap; i1 < n; i1++)
+                {
+                    int temp = array[i1];
+                    int j;
+                    for (j = i1; j >= gap && array[j - gap] > temp; j -= gap)
+                    {
+                        array[j] = array[j - gap];
+                    }
+                    array[j] = temp;
+                }
+                sortedArray = array;
+            }
+            // Обновление GUI (вынесено за внутренний цикл)
+
+
+        }
+
+        private  int[] GenerateTokudaSequence(int n)
+        {
+            Random rand = new Random();
+            int count = rand.Next(1, n);
+            int[] sequence = new int[count];
+            for (int i = 0; i < count; i++)
+            {
+                sequence[i] = rand.Next(1, n / 2);
+                sortedArray = sequence;
+            }
+            Array.Reverse(sequence);
+
+         
+            return sequence;
+        }
+
+      
+
+        
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        private void Sberegty_Click(object sender, RoutedEventArgs e)
+        {
+           
+
+            SaveArrayToFile(sortedArray);
+        }
+
+
+
+
+        private async Task VisualizeSortingAnimated(int[] array)
+        {
+            var dataSeries = new XyDataSeries<int, int>();
+            for (int i = 0; i < array.Length; i++)
+            {
+                dataSeries.Append(i, array[i]);
+            }
+
+            var renderableSeries = new FastColumnRenderableSeries
+            {
+                DataSeries = dataSeries,
+            };
+            sortingChart.RenderableSeries.Add(renderableSeries);
+
+            await Task.Delay(1000);
+
+            switch (_mode)
+            {
+                case "classik":
+                    await ClassicSort(array, dataSeries);
+                    break;
+                case "Tokuda":
+                    await TokudaSort(array, dataSeries);
+                    break;
+                case "Fibonachi":
+                    await FibonacciSort(array, dataSeries);
+                    break;
+                case "Sedjvik":
+                    await SedgwickSort(array, dataSeries);
+                    break;
+            }
+        }
+
+        private async Task ClassicSort(int[] array, XyDataSeries<int, int> dataSeries)
+        {
+            for (int i = 0; i < array.Length - 1; i++)
+            {
+                int minIndex = i;
+                for (int j = i + 1; j < array.Length; j++)
+                {
+                    if (array[j] < array[minIndex])
+                    {
+                        minIndex = j;
+                    }
+                }
+
+                int temp = array[i];
+                array[i] = array[minIndex];
+                array[minIndex] = temp;
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    dataSeries.Clear();
+                    for (int k = 0; k < array.Length; k++)
+                    {
+                        dataSeries.Append(k, array[k]);
+                    }
+                });
+
+                await Task.Delay(100);
+            }
+        }
+
+        private async Task TokudaSort(int[] array, XyDataSeries<int, int> dataSeries)
         {
             int n = array.Length;
             int[] tokudaSequence = GenerateTokudaSequence(n);
@@ -446,138 +605,124 @@ namespace kursach3._0
                     for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
                     {
                         array[j] = array[j - gap];
-
-                        sortedArray = array;
-
                     }
                     array[j] = temp;
 
-                    
-
-                }
-                
-            }
-        }
-
-        private  int[] GenerateTokudaSequence(int n)
-        {
-            Random rand = new Random();
-            int count = rand.Next(5, 15);
-            int[] sequence = new int[count];
-            for (int i = 0; i < count; i++)
-            {
-                sequence[i] = rand.Next(1, n / 2);
-                sortedArray = sequence;
-            }
-            Array.Reverse(sequence);
-
-         
-            return sequence;
-        }
-
-        public static int[] GenerateRandomArray4(int size, int minValue, int maxValue)
-        {
-            if (maxValue > 50000)
-            {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-
-            Random rand = new Random();
-            int[] array = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                array[i] = rand.Next(minValue, maxValue + 1);
-            }
-            return array;
-        }
-
-        internal static object GenerateRandomArray(int size)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-        private void Sberegty_Click(object sender, RoutedEventArgs e)
-        {
-            if (sortedArray == null)
-            {
-                MessageBox.Show("Сначала выполните сортировку массива.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            SaveArrayToFile((int[])sortedArray);
-        }
-
-
-
-
-
-
-
-
-        private async Task VisualizeSortingAnimated(int[] array, Action<int[]> sortingAlgorithm)
-        {
-            var dataSeries = new XyDataSeries<int, int>();
-            for (int i = 0; i < array.Length; i++)
-            {
-                dataSeries.Append(i, array[i]);
-            }
-
-            var renderableSeries = new FastColumnRenderableSeries
-            {
-                DataSeries = dataSeries,
-                
-            };
-            sortingChart.RenderableSeries.Add(renderableSeries);
-       
-            await Task.Delay(1000);
-
-            await Task.Run(async () =>
-            {
-                for (int i = 0; i < array.Length - 1; i++)
-                {
-                    int minIndex = i;
-
-                    for (int j = i + 1; j < array.Length; j++)
-                    {
-                        if (array[j] < array[minIndex])
-                        {
-                            minIndex = j;
-                        }
-                    }
-
-                    int temp = array[i];
-                    array[i] = array[minIndex];
-                    array[minIndex] = temp;
-
-                    Application.Current.Dispatcher.Invoke(() =>
+                    // Обновление GUI
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         dataSeries.Clear();
-                        for (int k = 0; k < array.Length; k++)
+                        for (int b = 0; b < array.Length; b++)
                         {
-                            dataSeries.Append(k, array[k]);
+                            dataSeries.Append(b, array[b]);
                         }
                     });
 
-
-
-                    await Task.Delay(100);
+                    await Task.Delay(1);
                 }
-            });
-
-            sortingChart.RenderableSeries.Clear();
+                await Task.Delay(100);
+            }
         }
+
+        private async Task FibonacciSort(int[] array, XyDataSeries<int, int> dataSeries)
+        {
+            int nq = array.Length;
+            int fib1 = 1;
+            int fib2 = 0;
+            int fib3 = 0;
+            int i;
+
+            while (fib3 < nq)
+            {
+                fib3 = fib1 + fib2;
+                fib1 = fib2;
+                fib2 = fib3;
+            }
+            fib1 = fib2 - fib1;
+            fib2 -= fib1;
+
+            while (fib2 > 0)
+            {
+                i = fib2;
+                while (i < nq)
+                {
+                    int temp = array[i];
+                    int j = i - fib2;
+                    while (j >= 0 && array[j] > temp)
+                    {
+                        array[j + fib2] = array[j];
+                        j -= fib2;
+                    }
+                    array[j + fib2] = temp;
+                    i++;
+                }
+                int tempFib = fib2;
+                fib2 = fib1;
+                fib1 = tempFib - fib1;
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    dataSeries.Clear();
+                    for (int k = 0; k < array.Length; k++)
+                    {
+                        dataSeries.Append(k, array[k]);
+                    }
+                });
+
+                await Task.Delay(1000);
+            }
+        }
+
+        private async Task SedgwickSort(int[] array, XyDataSeries<int, int> dataSeries)
+        {
+            int n = array.Length;
+            int gap = 1;
+            while (gap < n / 3)
+            {
+                gap = 3 * gap + 1;
+            }
+
+            while (gap >= 1)
+            {
+                for (int i = gap; i < n; i++)
+                {
+                    int temp = array[i];
+                    int j;
+                    for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
+                    {
+                        array[j] = array[j - gap];
+                    }
+                    array[j] = temp;
+                }
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    dataSeries.Clear();
+                    for (int k = 0; k < array.Length; k++)
+                    {
+                        dataSeries.Append(k, array[k]);
+                    }
+                });
+
+                await Task.Delay(1000);
+
+                gap /= 3;
+            }
+        }
+
 
         private async void Visual_Click(object sender, RoutedEventArgs e)
         {
+
+            //if (sortedArray == null)
+            //{
+            //    MessageBox.Show("Спочатку виконайте сортировку масива.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+            //    return;
+            //}
+
             if (ContainsWhitespace(Size_array.Text) || ContainsWhitespace(Min_value.Text) || ContainsWhitespace(Max_value.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -597,18 +742,28 @@ namespace kursach3._0
 
             if (maxValue > 50000)
             {
-                MessageBox.Show("Максимальное значение элемента не должно превышать 50000.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Максимальне значення елемента не повинно перевищувати 50000.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            int[] array = GenerateRandomArray(size, minValue, maxValue);
+            if (size < 100)
+            {
+                MessageBox.Show("Мінімальний розмір масиву має бути не менше 100 елементів.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
+
+            string arrayType = (ArrayTypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
+
+            int[] array = GenerateArray(size, minValue, maxValue, arrayType);
+            if (array == null)
+                return;
+            //Array.Sort(array);
+            //Array.Reverse(array);
             sortingChart.RenderableSeries.Clear();
 
-            await VisualizeSortingAnimated(array, ShellSortClassik);
-            await VisualizeSortingAnimated(array, ShellSortSedgewick);
-            await VisualizeSortingAnimated(array, ShellSortFibonacci);
-            await VisualizeSortingAnimated(array, ShellSortTokuda);
+            await VisualizeSortingAnimated(array);
+
         }
 
 
@@ -628,14 +783,11 @@ namespace kursach3._0
 
 
 
-
-
-
         private void Size_array_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (ContainsWhitespace(Size_array.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -644,10 +796,9 @@ namespace kursach3._0
 
 
 
-
             if (ContainsWhitespace(Min_value.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -655,7 +806,7 @@ namespace kursach3._0
         {
             if (ContainsWhitespace(Max_value.Text))
             {
-                MessageBox.Show("Введенные данные не должны содержать пробелы.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введені дані не можуть містити пробіли.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -678,42 +829,52 @@ namespace kursach3._0
             if (!char.IsDigit(e.Text, 0) && e.Text != ".")
             {
                 e.Handled = true; // Отменяем ввод символа, если он не является числом или десятичной точкой
-                MessageBox.Show("Пожалуйста, вводите только числа.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Будь ласка, вводіть лише числа.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
 
 
-        private void SaveArrayToFile(int[] array)
+        public void SaveArrayToFile(int[] array)
         {
-            // Предположим, что пользователь выбирает место сохранения файла
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "SortedArray"; // Имя файла по умолчанию
-            dlg.DefaultExt = ".txt"; // Расширение файла по умолчанию
-            dlg.Filter = "Text documents (.txt)|*.txt"; // Фильтр файлов
+            if (array == null || array.Length == 0)
+            {
+                MessageBox.Show("Массив пуст или не инициализирован.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
-            // Показываем диалог для сохранения файла
-            Nullable<bool> result = dlg.ShowDialog();
+            SaveFileDialog dlg = new SaveFileDialog
+            {
+                FileName = "SortedArray", // Имя файла по умолчанию
+                DefaultExt = ".txt", // Расширение файла по умолчанию
+                Filter = "Text documents (.txt)|*.txt" // Фильтр файлов
+            };
 
-            // Пользователь выбрал файл для сохранения
+            bool result = (bool)dlg.ShowDialog();
+
             if (result == true)
             {
-                // Сохраняем отсортированный массив в файл
                 string filePath = dlg.FileName;
                 try
                 {
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(filePath))
+                    using (StreamWriter file = new StreamWriter(filePath))
                     {
                         foreach (int num in array)
                         {
                             file.WriteLine(num);
                         }
                     }
-                    MessageBox.Show("Отсортированный массив успешно сохранен в файл.", "Сохранение завершено", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show("Відсортований масив успішно збережено у файл.", "Збереження завершено", MessageBoxButton.OK, MessageBoxImage.Information);
+                    });
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show($"Помилка збереження файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
                 }
             }
         }
@@ -736,13 +897,6 @@ namespace kursach3._0
         }
 
 
-
-
-
-
-
-
-       
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -783,11 +937,6 @@ namespace kursach3._0
             // Открытие нового окна
             newWindow.Show();
         }
-
-
-
-
-
 
 
 
@@ -844,6 +993,11 @@ namespace kursach3._0
         {
             Window2 secondWindow = new Window2();
             secondWindow.Show();
+        }
+
+        private void ArrayTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 

@@ -9,8 +9,8 @@ namespace kursach3._0
 {
     public class MyService
     {
-       
-    public static void ShellSortClassic(int[] array)
+
+        public static void ShellSortClassic(int[] array)
         {
             int n = array.Length;
             for (int gap = n / 2; gap > 0; gap /= 2)
@@ -31,45 +31,51 @@ namespace kursach3._0
         // Метод Шелла з послідовністю дельт Седжвіка
         public static void ShellSortSedgewick(int[] array)
         {
-            int n = array.Length;
+            int nw = array.Length;
             int gap = 1;
-            while (gap < n / 3)
+            while (gap < nw / 3)
             {
                 gap = 3 * gap + 1;
             }
             while (gap >= 1)
             {
-                for (int i = gap; i < n; i++)
+                for (int iw = gap; iw < nw; iw++)
                 {
-                    int temp = array[i];
+                    int temp = array[iw];
                     int j;
-                    for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
+                    for (j = iw; j >= gap && array[j - gap] > temp; j -= gap)
                     {
                         array[j] = array[j - gap];
                     }
-                    array[j] = temp;
+
+
+
                 }
                 gap /= 3;
             }
+
         }
 
         // Метод Шелла з послідовністю дельт Фібоначі
         public static void ShellSortFibonacci(int[] array)
         {
-            int n = array.Length;
+            int nq = array.Length;
             int fib1 = 1;
             int fib2 = 0;
             int fib3 = 0;
-            while (fib3 < n)
+            int i;
+            while (fib3 < nq)
             {
                 fib3 = fib1 + fib2;
                 fib1 = fib2;
                 fib2 = fib3;
             }
+            fib1 = fib2 - fib1;
+            fib2 -= fib1;
             while (fib2 > 0)
             {
-                int i = fib2;
-                while (i < n)
+                i = fib2;
+                while (i < nq)
                 {
                     int temp = array[i];
                     int j = i - fib2;
@@ -81,10 +87,13 @@ namespace kursach3._0
                     array[j + fib2] = temp;
                     i++;
                 }
-                fib3 = fib1;
+                int tempFib = fib2;
                 fib2 = fib1;
-                fib1 = fib3 - fib2;
+                fib1 = tempFib - fib1;
             }
+
+            // Обновление GUI (если необходимо)
+
         }
 
         // Метод Шелла з послідовністю дельт Токуда
@@ -95,17 +104,19 @@ namespace kursach3._0
             for (int k = tokudaSequence.Length - 1; k >= 0; k--)
             {
                 int gap = tokudaSequence[k];
-                for (int i = gap; i < n; i++)
+                for (int i1 = gap; i1 < n; i1++)
                 {
-                    int temp = array[i];
+                    int temp = array[i1];
                     int j;
-                    for (j = i; j >= gap && array[j - gap] > temp; j -= gap)
+                    for (j = i1; j >= gap && array[j - gap] > temp; j -= gap)
                     {
                         array[j] = array[j - gap];
                     }
                     array[j] = temp;
                 }
             }
+            // Обновление GUI (вынесено за внутренний цикл)
+
         }
 
         // Генерування послідовності дельт Токуда
@@ -134,21 +145,6 @@ namespace kursach3._0
         }
 
         // Генерування випадкового масиву з заданими межами значень
-        private int[] GenerateRandomArray(int size, int minValue, int maxValue)
-        {
-            if (size < 100)
-            {
-                MessageBox.Show("Минимальный размер массива должен быть не менее 100 элементов.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null; // Возвращаем null в случае ошибки
-            }
-
-            Random random = new Random();
-            int[] array = new int[size];
-            for (int i = 0; i < size; i++)
-            {
-                array[i] = random.Next(minValue, maxValue + 1);
-            }
-            return array;
-        }
+        
     }
 }
